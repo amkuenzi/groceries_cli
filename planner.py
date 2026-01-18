@@ -6,86 +6,77 @@ TODO: refactor into service classes instead of functions
 TODO: check all planner keys are in recipies
 """
 
-from typing import List, Dict, Union
+from typing import List, Dict
 
 from models import Ingredient
-from storage import Storage, StorageData     # Storage class prototype
-from recipes import RecipeNotFoundError
+from storage import StorageData     # Storage class prototype
+from recipes import RecipeNotFoundError, RecipeExistsError
 from pantry import InvalidAdjustError
+from utils import select_data_source
 
-def add_item(storage: Union[Storage, StorageData], name:str, portions:int) -> str:
-    if isinstance(storage, Storage):
-        cm: StorageData = storage.storage_data()
+
+@select_data_source
+def add_item(data: StorageData, name:str, portions:int) -> tuple[StorageData, str]:
+    name = name.lower()
+    if name in data.planner:
+        raise RecipeExistsError(f"Planner: already contains {name}")
+    if name not in data.recipes:
+        raise RecipeNotFoundError(f"Planner: {name} not in recipe library")
+    
+    data.planner[name] = portions
+    return data, f"Planner: added {name.capitalize()} ({portions} portions)"
+
+@select_data_source
+def remove_item(data: StorageData, name:str) -> tuple[StorageData, str]:
+    if name.lower() not in data.planner:
+        raise RecipeNotFoundError(f"{name} not in planner")
     else:
-        cm: StorageData = Storage.use_storage_data(storage)
-    with cm as data:
-        if name.lower() in data.planner:
-            data.planner[name] += portions      # add portions if meal already exists
+        del data.planner[name]
+        return data, f"Planner: removed {name} from planner"
+
+@select_data_source
+def get_item(data: StorageData, name:str) -> int:
+    if name.lower() not in data.planner:
+        raise RecipeNotFoundError(f"{name} not in planner")
+    else:
+        return data.planner[name]
+
+@select_data_source
+def list_items(data: StorageData) -> List[tuple[str, int]]:
+    return [(name, portions) for name, portions in data.planner.items()]
+
+@select_data_source
+def adjust_portions(data: StorageData, name:str, portions:str) -> tuple[StorageData, str]:
+    name = name.lower()
+    portions = int(portions)
+    sign = portions[0]
+    if sign == "-":
+        data.planner[name] -= portions
+        if data.planner[name] <= 0:
+            return remove_item(data=data, name=name)
         else:
-            data.planner[name] = portions
-    return f"Added {portions} portions of {name.lower()}"
+            return data, f"Planner: reduced {name} by {portions} portions to {data.planner[name]}"
+    
+    if name not in data.planner:
+        return add_item(data, name, portions)
+    else:
+        data.planner[name] += portions
+        return data, f"Planner: increased {name} by {portions} portions to {data.planner[name]}"
 
+@select_data_source
+def generate_shopping_list(data: StorageData) -> Dict[str, Ingredient]:
+    
+    scaled_recipes = {name: data.recipes[name].scaled_ingredients(portions) 
+                      for name, portions in data.planner.items()}
 
-def get_item(storage: Storage, name:str) -> int:
-    with storage.storage_data() as data:
-        if name.lower() not in data.planner:
-            raise RecipeNotFoundError(f"{name} not in planner")
-        else:
-            return data.planner[name]
-
-def remove_item(storage: Storage, name:str) -> str:
-    with storage.storage_data() as data:
-        if name.lower() not in data.planner:
-            raise RecipeNotFoundError(f"{name} not in planner")
-        else:
-            del data.planner[name]
-            return f"Removed {name} from planner"
-
-def list_items(storage: Storage) -> List[tuple[str, int]]:
-    with storage.storage_data() as data:
-        return [(name, portions) for name, portions in data.planner.items()]
-
-def adjust_portions(storage: Storage, name:str, amount:int, delta: bool=False) -> str:
-    with storage.storage_data() as data:
-        if not delta:
-            if amount < 0:
-                raise InvalidAdjustError(f"Planner adjust: {name}, portions cannot be < 0")
-            if name.lower() not in data.planner:
-                message = add_item(storage=data, name=name, portions=amount)
+    # 4 flatten ingredients8
+    shopping_ingredients = {}
+    for rname, ingredList in scaled_recipes.items():
+        for i in ingredList:
+            if i.name not in shopping_ingredients.keys():
+                shopping_ingredients[i.name] = {'quantity': i.quantity, "unit": i.unit}
             else:
-                data.planner[name.lower()] = amount
-                message = f"Set {name} portions to {amount}"
-        else:
-            data.planner[name.lower()] += amount
-            message = f"Set {name} portions to {amount}"
-            if data.planner[name.lower()] < 0:
-                message = remove_item(storage=storage, name=name)
-    return message
-
-
-def generate_shopping_list(storage: Storage) -> Dict[str, Ingredient]:
-    with storage.storage_data() as data:
-        # 1 select recipes by planner
-        selected_recipes = data.recipes.keys() & data.planner.keys()
-        # 2 get scaling factors
-        scaling_factors = {
-            name: data.planner[name] / data.recipes[name].portions
-            for name in selected_recipes
-            }
-        # 3 scale recipes
-        scaled_recipe_ingredients: Dict[str,List[Ingredient]] = {
-            name: [i * scaling_factors[name] 
-                   for i in data.recipes[name].ingredients]
-            for name in selected_recipes
-            }
-        # 4 flatten ingredients
-        shopping_ingredients = {}
-        for rname, ingredList in scaled_recipe_ingredients.items():
-            for i in ingredList:
-                if i.name not in shopping_ingredients.keys():
-                    shopping_ingredients[i.name] = {'quantity': i.quantity, "unit": i.unit}
-                else:
-                    shopping_ingredients[i.name]["quantity"] += i.quantity
-        
-        return shopping_ingredients
+                shopping_ingredients[i.name]["quantity"] += i.quantity
+    
+    return shopping_ingredients
  
