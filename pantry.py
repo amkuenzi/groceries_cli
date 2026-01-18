@@ -8,8 +8,9 @@ TODO: refactor into service classes instead of functions
 """
 from typing import List
 
-from storage import Storage     # Storage class prototype
+from storage import StorageData     # Storage class prototype
 from models import Ingredient
+from utils import select_data_source
 
 class PantryItemNotFoundError(Exception):
     pass
@@ -20,55 +21,51 @@ class UnitMismatchError(Exception):
 class InvalidAdjustError(Exception):
     pass
 
+@select_data_source
+def add_item(data: StorageData, item: Ingredient) -> tuple[StorageData, str]:
+    item.name = item.name.lower()
 
-def add_item(storage: Storage, item: Ingredient) -> str:
-    with storage.storage_data() as data:
-        if item.name.lower() in data.pantry:
-            existing = data.pantry[item.name.lower()]
-            if existing.unit != item.unit:
-                raise UnitMismatchError(f"Item: {item.name.lower()} unit '{item.unit}' != '{existing.unit}'")
-            
-            existing.quantity += item.quantity
-        else:
-            data.pantry[item.name.lower()] = item
-    return f"Added {item.name.lower()}: {item.quantity} {item.unit}"
-
-
-def get_item(storage: Storage, name: str) -> Ingredient:
-    with storage.storage_data() as data:
-        if name.lower() in data.pantry:
-            found = data.pantry[name.lower()]
-        else:
-            raise PantryItemNotFoundError(name.lower())
-
-
-def remove_item(storage: Storage, name: str) -> str:
-    with storage.storage_data() as data:
-        if name.lower() not in data.pantry:
-            raise PantryItemNotFoundError(name)
+    if item.name in data.pantry:
+        if data.pantry[item.name].unit != item.unit:
+            raise UnitMismatchError(f"Pantry: {item.name.lower()} unit '{item.unit}' != '{data.pantry[item.name].unit}'")
         
-        del data.pantry[name.lower()]
-    return f"Removed {name.lower()}"
+        data.pantry[item.name].quantity += item
+        return data, f"Pantry: {str(data.pantry[item.name])}, increased by {item.quantity} {item.unit}"
+    else:
+        data.pantry[item.name] = item
+        return data, f"Pantry: added {str(data.pantry[item.name])}"
 
+@select_data_source
+def take_item(data: StorageData, item: Ingredient) -> tuple[StorageData, str]:
+    item.name = item.name.lower()
 
-def list_items(storage: Storage) -> List[Ingredient]:
-    with storage.storage_data() as data:
-        pantry_list = list(data.pantry.values())
-    return pantry_list
+    if item.name not in data.pantry:
+        raise PantryItemNotFoundError(f"Pantry: {item.name} not listed, so cannot take any away")
     
+    if item.unit != data.pantry[item.name].unit:
+        raise UnitMismatchError(f"Pantry: {item.name.lower()} unit '{item.unit}' != '{data.pantry[item.name].unit}'")
+    
+    data.pantry[item.name] -= item
+    return data, f"Pantry: {str(data.pantry[item.name])}, reduced by {item.quantity} {item.unit}"
+    
+@select_data_source
+def remove_item(data: StorageData, name: str) -> tuple[StorageData, str]:
+    name = name.lower()
+    if name not in data.pantry:
+        raise PantryItemNotFoundError(name)
+    
+    data.pantry[name].quantity = 0
+    return data, f"Pantry: {str(data.pantry[name])}"
 
-def adjust_quantity(storage: Storage, name: str, amount: float, delta: bool=True) -> str:
-    """TODO: add unit adjustments"""
-    with storage.storage_data() as data:
-        if name.lower() not in data.pantry:
-            raise PantryItemNotFoundError(name.lower())
-        
-        if not delta:
-            if amount < 0:
-                raise InvalidAdjustError("Cannot set quantity to below zero.")
-            else:
-                data.pantry[name.lower()].quantity = amount
-        else:
-            data.pantry[name.lower()].quantity += amount
-            if data.pantry[name.lower()].quantity < 0:
-                del data.pantry[name.lower()]
+@select_data_source
+def get_item(data: StorageData, name: str) -> Ingredient:
+    name = name.lower()
+    if name.lower() in data.pantry:
+        return data.pantry[name.lower()]
+    else:
+        raise PantryItemNotFoundError(name.title())
+
+@select_data_source
+def list_items(data: StorageData) -> List[Ingredient]:
+    pantry_list = list(data.pantry.values())
+    return pantry_list
