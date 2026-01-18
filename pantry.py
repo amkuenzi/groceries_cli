@@ -61,7 +61,7 @@ def remove_item(data: StorageData, name: str) -> tuple[StorageData, str]:
 def get_item(data: StorageData, name: str) -> Ingredient:
     name = name.lower()
     if name.lower() in data.pantry:
-        return data.pantry[name.lower()]
+        return data.pantry[name]
     else:
         raise PantryItemNotFoundError(name.title())
 

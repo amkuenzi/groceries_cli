@@ -8,10 +8,10 @@ TODO: check all planner keys are in recipies
 
 from typing import List, Dict
 
-from models import Ingredient
 from storage import StorageData     # Storage class prototype
+from models import Ingredient
 from recipes import RecipeNotFoundError, RecipeExistsError
-from pantry import InvalidAdjustError
+import pantry
 from utils import select_data_source
 
 
@@ -48,6 +48,7 @@ def list_items(data: StorageData) -> List[tuple[str, int]]:
 @select_data_source
 def adjust_portions(data: StorageData, name:str, portions:str) -> tuple[StorageData, str]:
     name = name.lower()
+    portions = portions.replace(" ", "")
     sign = portions[0]
     portions = int(portions)
     if sign == "-":
@@ -65,18 +66,33 @@ def adjust_portions(data: StorageData, name:str, portions:str) -> tuple[StorageD
 
 @select_data_source
 def generate_shopping_list(data: StorageData) -> Dict[str, Ingredient]:
+    # scale recipies by plan portions
+    allowed_recipes = data.planner.keys() & data.recipes.keys()
+    for k in data.planner.copy().keys():
+        if k not in allowed_recipes:
+            print(f"{k} not in RecipeLib, removing")
+            remove_item(data, k)
     
-    scaled_recipes = {name: data.recipes[name].scaled_ingredients(portions) 
-                      for name, portions in data.planner.items()}
-
-    # 4 flatten ingredients8
+    scaled_recipes: Dict[str, List[Ingredient]] = {
+        name: data.recipes[name].scaled_ingredients(portions) 
+        for name, portions in data.planner.items()
+        }
+    
+    # collate ingredients from all recipes
     shopping_ingredients = {}
-    for rname, ingredList in scaled_recipes.items():
+    for _, ingredList in scaled_recipes.items():
         for i in ingredList:
             if i.name not in shopping_ingredients.keys():
-                shopping_ingredients[i.name] = {'quantity': i.quantity, "unit": i.unit}
+                shopping_ingredients[i.name] = i
             else:
-                shopping_ingredients[i.name]["quantity"] += i.quantity
-    
+                shopping_ingredients[i.name] += i
+
+    # subtract pantry contents
+    for n, i in shopping_ingredients.items():
+        # print(pantry.get_item(data=data, name="rice"))
+        try:
+            shopping_ingredients[n] -= pantry.get_item(data, n)
+        except pantry.PantryItemNotFoundError:
+            continue
     return shopping_ingredients
  
