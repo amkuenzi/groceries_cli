@@ -12,7 +12,7 @@ def select_data_source(func):
 
         if isinstance(data_source, StorageInterface):
             with data_source.storage_data() as data:
-                return func(data, *args, *kwargs)
+                return func(data, *args, **kwargs)
             
         elif isinstance(data_source, StorageData):
             return func(data_source, *args, **kwargs)
