@@ -8,7 +8,7 @@ def main():
     data = groceryLoader.load()
     print(data)
 
-    chilli = Recipe("chilli con carne",
+    chilli = Recipe("chilli carne",
                        [Ingredient('ground beef', 500, 'g'),
                         Ingredient('kidney beans', 2, 'tins'),
                         Ingredient('red pepper', 2, 'units'),
@@ -25,9 +25,19 @@ def main():
                         ], portions=2)
     
     # test recipes
+    print("\n\n carbonara get \n\n")
+    print(recipes.get_recipe(groceryLoader, 'carbonara'))
     
-    response = recipes.add_recipe(groceryLoader, chilli)
-    print(response)
+    data, response = recipes.add_recipe(groceryLoader, chilli)
+    
+    print("\n\n" + response + "\n\n")
+
+
+    print(pantry.get_item(data, "rice"))
+    
+
+
+
     print(groceryLoader.load())
     response = recipes.add_recipe(groceryLoader, carbonara)
     print(response)
