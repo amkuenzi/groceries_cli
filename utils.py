@@ -15,7 +15,7 @@ def select_data_source(func):
                 return func(data, *args, *kwargs)
             
         elif isinstance(data_source, StorageData):
-            return func(data, *args, **kwargs)
+            return func(data_source, *args, **kwargs)
         
         else:
             raise ValueError(f"{repr(func)} data source must be of type: {repr(StorageInterface)} or {repr(StorageData)}")
