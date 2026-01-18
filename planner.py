@@ -48,10 +48,10 @@ def list_items(data: StorageData) -> List[tuple[str, int]]:
 @select_data_source
 def adjust_portions(data: StorageData, name:str, portions:str) -> tuple[StorageData, str]:
     name = name.lower()
-    portions = int(portions)
     sign = portions[0]
+    portions = int(portions)
     if sign == "-":
-        data.planner[name] -= portions
+        data.planner[name] += portions
         if data.planner[name] <= 0:
             return remove_item(data=data, name=name)
         else:
