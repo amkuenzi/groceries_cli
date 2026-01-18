@@ -3,6 +3,7 @@
 TODO: refactor into full service classes"""
 
 from dataclasses import dataclass, field
+from typing import List
 
 @dataclass
 class Ingredient(object):
@@ -16,14 +17,12 @@ class Ingredient(object):
     def __str__(self):
         return f"{self.name}: {self.quantity} {self.unit}"
 
-    def __mul__(self, scalar: float):
-        if not isinstance(scalar, (int, float)):
-            return NotImplemented
+    def __mul__(self, scalar: int | float):
         return Ingredient(name=self.name, 
-                          quantity=self.quantity*scalar,
+                          quantity=self.quantity * scalar,
                           unit=self.unit)
 
-    def __rmul__(self, scalar: float):
+    def __rmul__(self, scalar: int | float):
         return self.__mul__(scalar)
 
 @dataclass
@@ -40,7 +39,10 @@ class Recipe(object):
         for i in self.ingredients:
             selfstr += f"    " + str(i) + "\n"
         return selfstr
-
+    
+    def scaled_ingredients(self, desired_portions: int) -> List[Ingredient]:
+        factor = desired_portions / self.portions
+        return [ing*factor for ing in self.ingredients]
 
 @dataclass
 class Pantry(object):
