@@ -1,0 +1,96 @@
+{
+  "recipes": {
+    "chicken tikka masala": {
+      "name": "chicken tikka masala",
+      "ingredients": [
+        {
+          "name": "chicken",
+          "quantity": 200,
+          "unit": "g"
+        },
+        {
+          "name": "rice",
+          "quantity": 500,
+          "unit": "g"
+        }
+      ],
+      "portions": 2,
+      "cartegory": "",
+      "tags": []
+    },
+    "chilli con carne": {
+      "name": "chilli con carne",
+      "ingredients": [
+        {
+          "name": "ground beef",
+          "quantity": 500,
+          "unit": "g"
+        },
+        {
+          "name": "kidney beans",
+          "quantity": 2,
+          "unit": "tins"
+        },
+        {
+          "name": "red pepper",
+          "quantity": 2,
+          "unit": "units"
+        },
+        {
+          "name": "chili flakes",
+          "quantity": 2,
+          "unit": "pinches"
+        },
+        {
+          "name": "onions",
+          "quantity": 2.5,
+          "unit": "units"
+        }
+      ],
+      "portions": 8,
+      "cartegory": "",
+      "tags": []
+    },
+    "carbonara": {
+      "name": "carbonara",
+      "ingredients": [
+        {
+          "name": "spaghetti",
+          "quantity": 250,
+          "unit": "g"
+        },
+        {
+          "name": "eggs",
+          "quantity": 2,
+          "unit": "units"
+        },
+        {
+          "name": "parmegiano reggiano",
+          "quantity": 200,
+          "unit": "g"
+        },
+        {
+          "name": "garlic",
+          "quantity": 2,
+          "unit": "cloves"
+        },
+        {
+          "name": "bacon lardons",
+          "quantity": 100,
+          "unit": "g"
+        }
+      ],
+      "portions": 2,
+      "cartegory": "",
+      "tags": []
+    }
+  },
+  "pantry": {
+    "rice": {
+      "name": "rice",
+      "quantity": 1000,
+      "unit": "g"
+    }
+  },
+  "planner": {}
+}
