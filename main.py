@@ -48,12 +48,9 @@ def main():
         elif cmd == "a":
             # add to meal plan
             [print(f"{m[0]}: {m[1]}") for m in planner.list_items(groceryLoader)]
-            r = input("Input recipie to add or modify: ")
-            a = input("Input number of portions, [+/-] for delta: ")
-            delta = False
-            if a.startswith('+') or a.startswith('-'):
-                delta = True
-            print(planner.adjust_portions(groceryLoader, r, int(a), delta))
+            n = input("Input recipie to add or modify: ")
+            p = input("Input number of portions, [+/-] for delta: ")
+            print(planner.adjust_portions(groceryLoader, name=n, portions=p))
             
         elif cmd == "d":
             # remove from meal plan
@@ -63,8 +60,8 @@ def main():
         elif cmd == "g":
             # generate shopping list
             shopping_list = planner.generate_shopping_list(groceryLoader)
-            for n, v in shopping_list.items():
-                print(f"{n}: {v["quantity"]} {v["unit"]}")
+            for k in shopping_list.keys():
+                print(str(shopping_list[k]))
 
 if __name__ == "__main__":
     main()
