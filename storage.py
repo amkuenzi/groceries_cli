@@ -27,7 +27,7 @@ class StorageData:
 
 
 @runtime_checkable
-class Storage(Protocol):
+class StorageInterface(Protocol):
     def load(self) -> StorageData:
         ...
 
@@ -50,7 +50,7 @@ class Storage(Protocol):
         yield data
         
 
-class jsonStorage(Storage):
+class jsonStorage(StorageInterface):
 
     def __init__(self, path: str):
         super().__init__()
