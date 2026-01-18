@@ -15,7 +15,25 @@ class Ingredient(object):
     # TODO: unit conversions on adding two of the same ingredient together
 
     def __str__(self):
-        return f"{self.name}: {self.quantity} {self.unit}"
+        return f"{self.name.title()}: {self.quantity} {self.unit}"
+    
+    def __add__(self, item):
+        """TODO: add mismatch unit handling here"""
+        if not hasattr(item, "quantity"):
+            raise TypeError(f"{self.__repr__()}: add method only implemented for ingreditents")
+        return Ingredient(name=self.name,
+                          quantity=self.quantity + item.quantity,
+                          unit=self.unit)
+    
+    def __sub__(self, item):
+        """TODO: consider how mismatch unit handling here works"""
+        if not hasattr(item, "quantity"):
+            raise TypeError(f"{self.__repr__()}: add method only implemented for ingreditents")
+        new_quan = self.quantity - item.quantity
+        if new_quan < 0: new_quan = 0
+        return Ingredient(name=self.name,
+                          quantity=new_quan,
+                          unit=self.unit)
 
     def __mul__(self, scalar: int | float):
         return Ingredient(name=self.name, 
@@ -35,7 +53,7 @@ class Recipe(object):
     tags: list[str] = field(default_factory=list)
 
     def __str__(self):
-        selfstr = f"{self.name} ({self.portions} portions)\n"
+        selfstr = f"{self.name.title()} ({self.portions} portions)\n"
         for i in self.ingredients:
             selfstr += f"    " + str(i) + "\n"
         return selfstr
