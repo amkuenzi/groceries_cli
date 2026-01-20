@@ -21,9 +21,9 @@ TODO: Add transaction-style batching, also to pantry, planner
 """
 from typing import List
 
-from storage import StorageData     # Storage class prototype
-from models import Recipe
-from utils import select_data_source
+from grocery.storage import StorageData     # Storage class prototype
+from grocery.models import Recipe
+from grocery.utils import select_data_source
 
 class RecipeExistsError(Exception):
     pass

@@ -60,6 +60,9 @@ def main():
         elif cmd == "g":
             # generate shopping list
             shopping_list = planner.generate_shopping_list(groceryLoader)
+
+            print("\n----- Shopping List -----\n")
+
             for k in shopping_list.keys():
                 print(str(shopping_list[k]))
 

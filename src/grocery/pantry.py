@@ -8,9 +8,9 @@ TODO: refactor into service classes instead of functions
 """
 from typing import List
 
-from storage import StorageData     # Storage class prototype
-from models import Ingredient
-from utils import select_data_source
+from grocery.storage import StorageData     # Storage class prototype
+from grocery.models import Ingredient
+from grocery.utils import select_data_source
 
 class PantryItemNotFoundError(Exception):
     pass

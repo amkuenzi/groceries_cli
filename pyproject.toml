@@ -1,0 +1,23 @@
+# Entry point (in pyproject.toml or setup.py):
+
+[project]
+name = "grocery"
+version = "1.0.0"
+description = "Groceries CLI"
+requires-python = ">=3.13"
+dependencies = [
+    "click"
+]
+
+[project.scripts]
+grocery = "grocery.cli:cli"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

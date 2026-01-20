@@ -8,11 +8,11 @@ TODO: check all planner keys are in recipies
 
 from typing import List, Dict
 
-from storage import StorageData     # Storage class prototype
-from models import Ingredient
-from recipes import RecipeNotFoundError, RecipeExistsError
-import pantry
-from utils import select_data_source
+from grocery.storage import StorageData
+from grocery.models import Ingredient
+from grocery.recipes import RecipeNotFoundError, RecipeExistsError
+from grocery.utils import select_data_source
+import grocery.pantry as pantry
 
 
 @select_data_source
@@ -89,10 +89,10 @@ def generate_shopping_list(data: StorageData) -> Dict[str, Ingredient]:
 
     # subtract pantry contents
     for n, i in shopping_ingredients.items():
-        # print(pantry.get_item(data=data, name="rice"))
         try:
             shopping_ingredients[n] -= pantry.get_item(data, n)
         except pantry.PantryItemNotFoundError:
             continue
+
     return shopping_ingredients
  

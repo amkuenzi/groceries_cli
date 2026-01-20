@@ -16,7 +16,7 @@ from pathlib import Path
 from contextlib import contextmanager
 from datetime import datetime
 
-from models import Recipe, Pantry, Ingredient
+from grocery.models import Recipe, Ingredient
 
 
 @dataclass

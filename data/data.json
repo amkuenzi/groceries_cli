@@ -88,12 +88,11 @@
   "pantry": {
     "rice": {
       "name": "rice",
-      "quantity": 1000,
+      "quantity": 2000,
       "unit": "g"
     }
   },
   "planner": {
-    "carb": 5,
     "carbonara": 5,
     "chicken tikka masala": 2
   }
